@@ -1,0 +1,65 @@
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.clustering.KMeans
+import org.apache.spark.ml.feature.VectorAssembler
+
+object ClusteringDataPenerbangan {
+  def main(args: Array[String]): Unit = {
+    
+    val spark = SparkSession.builder
+      .appName("Clustering Data Penerbangan")
+      .master("local[*]")
+      .getOrCreate()
+
+  
+    val df = spark.read.format("csv")
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .load("C:\\dataset\\AirlineDelayCause.csv")
+
+
+    df.printSchema()
+
+
+    val assembler = new VectorAssembler()
+      .setInputCols(Array("arr_delay", "dep_delay"))
+      .setOutputCol("features")
+
+   
+    val featureDF = assembler.transform(df)
+
+   
+    featureDF.show(10)
+
+    
+    val kmeans = new KMeans()
+      .setK(3)
+      .setSeed(1L)
+      .setFeaturesCol("features")
+      .setPredictionCol("prediction")
+
+    val model = kmeans.fit(featureDF)
+
+   
+    val predictions = model.transform(featureDF)
+
+name := "ClusteringDataPenerbangan"
+
+version := "0.1"
+
+scalaVersion := "2.13.6"
+
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "3.3.0",
+  "org.apache.spark" %% "spark-sql" % "3.3.0",
+  "org.apache.spark" %% "spark-mllib" % "3.3.0"
+)
+
+
+
+    
+    predictions.select("arr_delay", "dep_delay", "prediction").show(10)
+
+    
+    spark.stop()
+  }
+}

@@ -1,0 +1,6 @@
+mkdir ClusteringDataPenerbangan
+cd ClusteringDataPenerbangan
+
+sbt new scala/scala-seed.g8
+
+sbt
